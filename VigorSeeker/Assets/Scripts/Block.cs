@@ -22,7 +22,8 @@ public enum ConnectType
 public enum which
 {
     Left,
-    Right
+    Right,
+    Top, //縦に連結
 
 }
 [ExecuteAlways]
@@ -539,11 +540,127 @@ public class Block : MonoBehaviour
             _springs.RemoveAt(spring2);
         }
     }
+
+    /// <summary>
+    /// 上に連結する場合の処理
+    /// </summary>
     public void OnUpKeyPress()
     {
-        //TODO: ここは要検討
-        //Debug.Log("On Up key is pressed");
-        this._isFixed = false;
+        if (defaultScene.selectedBlock == this)
+        {
+
+            //Debug.Log("selectedBlock is this " + this.ID);
+            //defaultScene.connectedBlock._leftLegInsertedBlock = this;
+            this._leftPocketInsertingBlock.Add(defaultScene.connectedBlock);
+            this._isFixed = false;
+            if (this._rightPocketInsertingBlock.Count != 0
+            && this._leftPocketInsertingBlock.Count != 0)
+            {
+                //閉じた状態で安定させる
+                //TODO: ここは要検討
+                //this._isFixed = true;
+            }
+            this.transform.position = defaultScene.connectedBlock.transform.position + new Vector3(0, _margin, 0);
+            UpdateMassPointPosition();
+            int i = 0;
+            foreach (var vertex in mesh.vertices)
+            {
+                _tmpVertices[i] = vertex;
+                i++;
+            }
+            //_tmpVertices[2] = new Vector3(_tmpVertices[0].x, _tmpVertices[2].y, _tmpVertices[2].z);
+            var LegLength = Vector3.Distance(_massPoints[3]._position, _massPoints[5]._position);
+            var LegLengthLocal = Vector3.Distance(_tmpVertices[3], _tmpVertices[5]); //ローカル座標系での脚の長さ
+            //連結面に直交するベクトルを外積で求める
+            var cross = -Vector3.Cross(_massPoints[0]._position - _massPoints[3]._position, _massPoints[4]._position - _massPoints[3]._position);
+            var crossLocal = -Vector3.Cross(_tmpVertices[0] - _tmpVertices[3], _tmpVertices[4] - _tmpVertices[3]);
+            if (defaultScene.connectedBlock._leftLegInsertedBlock != null)
+            {
+                cross = defaultScene.connectedBlock._massPoints[2]._position - defaultScene.connectedBlock._massPoints[0]._position;
+                crossLocal = defaultScene.connectedBlock._tmpVertices[2] - defaultScene.connectedBlock._tmpVertices[0];
+                //左足を含む面に平行に右脚の面を伸ばす
+                // 脚を曲げる
+                _tmpVertices[3] = (crossLocal).normalized * _margin + defaultScene.connectedBlock._tmpVertices[3];
+                _tmpVertices[5] = (crossLocal).normalized * LegLengthLocal + _tmpVertices[3];
+                _massPoints[3]._position = (cross).normalized * _margin + defaultScene.connectedBlock._massPoints[3]._position;
+                _massPoints[5]._position = (cross).normalized * LegLength + _massPoints[3]._position;
+                //_massPoints[5]._position = new Vector3(_massPoints[3]._position.x, _massPoints[5]._position.y, _massPoints[5]._position.z);
+            }
+            else
+            {
+                _tmpVertices[5] = crossLocal.normalized * LegLengthLocal + _tmpVertices[3];
+                //_massPoints[2]._position = new Vector3(_massPoints[0]._position.x, _massPoints[2]._position.y, _massPoints[2]._position.z);
+                _massPoints[5]._position = cross.normalized * LegLength + _massPoints[3]._position;
+            }
+
+            //左ポケット部分は固定点とする
+            // _massPoints[3]._isFixed = true;
+            // _massPoints[4]._isFixed = true;
+            mesh.SetVertices(_tmpVertices);
+            mesh.RecalculateBounds();
+            mesh.RecalculateNormals();
+            mesh.RecalculateTangents();
+            defaultScene.connectedBlock.OnRightKeyPress();
+            //TODO: 天井からつるすバネを張る
+            _massPoints[3]._position = (_leftPocketInsertingBlock[0]._massPoints[2]._position - _leftPocketInsertingBlock[0]._massPoints[0]._position).normalized * _margin + _leftPocketInsertingBlock[0]._massPoints[0]._position;
+            _massPoints[4]._position = (_leftPocketInsertingBlock[0]._massPoints[2]._position - _leftPocketInsertingBlock[0]._massPoints[0]._position).normalized * _margin + _leftPocketInsertingBlock[0]._massPoints[1]._position;
+            //TODO: バネを治す暫定的対応をちゃんと直す
+            //Debug.Log("springs " + _springs.Count);
+            i = 0;
+            int spring1 = 0;
+            int spring2 = 0;
+            foreach (var spring in _springs)
+            {
+                if (spring._massPointIndexes[0] == 5 && spring._massPointIndexes[1] == 3)
+                {
+                    //Debug.Log("Unko!! 5 3");
+                    spring1 = i;
+                }
+                if (spring._massPointIndexes[0] == 4 && spring._massPointIndexes[1] == 5)
+                {
+                    //Debug.Log("Unko!! 4 5");
+                    spring2 = i;
+                }
+                i++;
+            }
+
+            _springs.RemoveAt(spring1);
+            _springs.RemoveAt(spring2);
+            //Debug.Log("springs " + _springs.Count);
+            foreach (var spring in _springs)
+            {
+                // Debug.Log("unko is " + spring._massPointIndexes.Count + "[0]" + spring._massPointIndexes[0] + " 1 " + spring._massPointIndexes[1]);
+            }
+        }
+        if (defaultScene.connectedBlock == this)
+        {
+            //Debug.Log("connectedBlock is this " + this.ID);
+            this._leftLegInsertedBlock = defaultScene.selectedBlock;
+            this._isFixed = false;
+            if (this._rightPocketInsertingBlock.Count != 0
+            && this._leftPocketInsertingBlock.Count != 0)
+            {
+                //閉じた状態で安定させる
+                //TODO: ここは要検討
+                //this._isFixed = true;
+            }
+            //this.transform.position = this.transform.position + new Vector3(-blockVallaySize, _margin, 0);
+            int i = 0;
+            foreach (var vertex in mesh.vertices)
+            {
+
+                _tmpVertices[i] = vertex;
+                i++;
+            }
+            //以下の2行はバネを張り直す関係上いらない
+            //_tmpVertices[2] = new Vector3(_tmpVertices[0].x, _tmpVertices[2].y, _tmpVertices[2].z);
+            //_massPoints[2]._position = new Vector3(_massPoints[0]._position.x, _massPoints[2]._position.y, _massPoints[2]._position.z);
+            mesh.SetVertices(_tmpVertices);
+            mesh.RecalculateBounds();
+            mesh.RecalculateNormals();
+            mesh.RecalculateTangents();
+            ReSpring(_tmpVertices, which.Right, defaultScene.selectedBlock);
+        }
     }
     void UpdateVertices()
     {
@@ -794,6 +911,7 @@ public class Block : MonoBehaviour
     }
     public void ReSpring(Vector3[] vertices, which whichSpring, Block refBlock)
     {
+        //質点の情報を全て初期化する
         _massPoints.Clear();
         _springs.Clear();
         switch (whichSpring)
@@ -803,6 +921,7 @@ public class Block : MonoBehaviour
                 {
                     if (i == 2)
                     {
+                        //左足の質点を，被挿入ブロック
                         _massPoints.Add(refBlock._massPoints[5]);
                     }
 
@@ -854,6 +973,52 @@ public class Block : MonoBehaviour
                 mesh.RecalculateTangents();
                 break;
             case which.Left:
+                for (int i = 0; i < vertices.Length; i++)
+                {
+                    if (i == 5)
+                    {
+
+                        _massPoints.Add(refBlock._massPoints[2]);
+                    }
+                    else
+                    {
+                        var massPoint = gameObject.AddComponent<MassPoint>();
+                        massPoint.SetMassSpring(_mass, Vector3.zero, i, transform.TransformPoint(vertices[i]), this);
+                        _massPoints.Add(massPoint);
+                        if (i == 3 || i == 4)
+                        {
+                            massPoint._isFixed = true;
+                        }
+                    }
+                }
+                for (int i = 0; i < _initialSpringIndex.GetLength(0); i++)
+                {
+                    var spring = gameObject.AddComponent<Spring>();
+                    var massPoint1 = _massPoints[_initialSpringIndex[i, 0]];
+                    var massPoint2 = _massPoints[_initialSpringIndex[i, 1]];
+                    //TODO: distanceは遅いのでmagintudeを使う
+                    var initialLength = Vector3.Distance(massPoint1._position, massPoint2._position);
+                    spring.SetSpring(massPoint1, massPoint2,
+                    _springConstant, springLength: initialLength, _dampingConstant, 1.0f, springType: SpringType.Leg);
+                    _springs.Add(spring);
+                    massPoint1.AddSpring(spring);
+                    massPoint2.AddSpring(spring);
+                }
+                for (int i = 0; i < _legSpring.GetLength(0); i++)
+                {
+                    var spring = gameObject.AddComponent<Spring>();
+                    var massPoint1 = _massPoints[_legSpring[i, 0]];
+                    var massPoint2 = _massPoints[_legSpring[i, 1]];
+                    var initialLength = Vector3.Distance(massPoint1._position, massPoint2._position);
+                    spring.SetSpring(massPoint1, massPoint2,
+                    _springConstantLeg, springLength: initialLength, _dampingConstant, 1.0f, springType: SpringType.Leg);
+                    _springs.Add(spring);
+                    massPoint1.AddSpring(spring);
+                    massPoint2.AddSpring(spring);
+
+                }
+                break;
+            case which.Top:
                 for (int i = 0; i < vertices.Length; i++)
                 {
                     if (i == 5)

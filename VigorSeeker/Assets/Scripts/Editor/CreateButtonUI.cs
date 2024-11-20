@@ -156,7 +156,7 @@ public static class CreateButtonUi
             /*
             ←(テンキー4) : [wip]選択中のブロックを左上に接続
             →(テンキー9) : 選択中のブロックを右上に接続(選択中ブロックの左ポケットに接続対象ブロック右脚を挿入)
-            ↑(テンキー8) : 縦に連結
+            ↑(テンキー8) : 選択中のブロックを縦に連結
             A(テンキー1) : 選択中のブロックを左下に接続
             */
             if (defaultScene.selectedBlock != null
@@ -167,7 +167,6 @@ public static class CreateButtonUi
                     //Debug.Log("Up arrow key is pressed");
                     defaultScene.selectedBlock.OnUpKeyPress();
                     //defaultScene.connectedBlock.OnUpKeyPress();
-
                 }
                 if (ev.keyCode == KeyCode.LeftArrow || ev.keyCode == KeyCode.Keypad4)
                 {
