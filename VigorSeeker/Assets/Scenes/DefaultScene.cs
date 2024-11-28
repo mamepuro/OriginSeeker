@@ -8,11 +8,11 @@ public class DefaultScene : MonoBehaviour
     /// <summary>[
     /// 選択中のブロック
     /// </summary>
-    public Block selectedBlock;
+    public Block selectingBlock;
     /// <summary>
-    /// 接続対象のブロック
+    /// 接続対象のブロック(1つ前の操作で選択していたブロック)
     /// </summary>
-    public Block connectedBlock;
+    public Block previousBlock;
     public string message;
     public bool isVisible;
     // Start is called before the first frame update

@@ -59,50 +59,55 @@ public static class CreateButtonUi
             }
 
 
-            if (defaultScene.selectedBlock == null
+            if (defaultScene.selectingBlock == null
             && Selection.activeGameObject != null)
             {
                 if (Selection.activeGameObject.GetComponent<Block>() != null)
                 {
-                    //Debug.Log("selectedBlock is not null");
+                    //Debug.Log("selectingBlock is not null");
                     //Debug.Log("selection.activeGameObject is " + Selection.gameObjects.Length);
-                    defaultScene.selectedBlock = Selection.activeGameObject.GetComponent<Block>();
-                    if (defaultScene.connectedBlock != null)
+                    defaultScene.selectingBlock = Selection.activeGameObject.GetComponent<Block>();
+                    if (defaultScene.selectingBlock != null && defaultScene.previousBlock != null)
                     {
-                        defaultScene.connectedBlock._isAnimatable = true;
+                        defaultScene.previousBlock._isAnimatable = true;
                     }
-                    defaultScene.selectedBlock._isAnimatable = false;
+                    defaultScene.selectingBlock._isAnimatable = false;
                 }
 
             }
-            else if (defaultScene.selectedBlock != null && Selection.activeGameObject != null)
+            else if (defaultScene.selectingBlock != null && Selection.activeGameObject != null)
             {
                 if (Selection.activeObject.GetComponent<Block>() != null)
                 {
-                    //Debug.Log("swapping selectedBlock and connectedBlock");
+                    //Debug.Log("swapping selectingBlock and previousBlock");
                     //旧選択対象を接続対象に設定
-                    if (defaultScene.connectedBlock != null)
+                    if (defaultScene.previousBlock != null)
                     {
-                        defaultScene.connectedBlock._isAnimatable = true;
+                        defaultScene.previousBlock._isAnimatable = true;
                     }
-                    defaultScene.connectedBlock = defaultScene.selectedBlock;
-                    defaultScene.selectedBlock = Selection.activeGameObject.GetComponent<Block>();
-                    defaultScene.selectedBlock._isAnimatable = false;
+                    defaultScene.previousBlock = defaultScene.selectingBlock;
+                    defaultScene.selectingBlock = Selection.activeGameObject.GetComponent<Block>();
+                    defaultScene.selectingBlock._isAnimatable = false;
                 }
             }
             else if (Selection.gameObjects.Length == 0)
             {
                 //Debug.Log("Yes");
-                defaultScene.selectedBlock._isAnimatable = true;
-                defaultScene.connectedBlock._isAnimatable = true;
-                defaultScene.selectedBlock = null;
-                defaultScene.connectedBlock = null;
+                if (defaultScene.selectingBlock != null)
+                {
+                    defaultScene.selectingBlock._isAnimatable = true;
+                }
+                if (defaultScene.previousBlock != null)
+                {
+                    defaultScene.previousBlock._isAnimatable = true;
+                }
+                defaultScene.selectingBlock = null;
+                defaultScene.previousBlock = null;
 
             }
         };
         _blocks = new List<Block>();
     }
-
     private static void OnGui(SceneView sceneView)
     {
         Handles.BeginGUI();
@@ -118,9 +123,9 @@ public static class CreateButtonUi
     {
         var rect = new Rect(10, 10, 400, 120);
         GUI.Box(rect, "current info");
-        GUI.Label(new Rect(20, 30, 180, 20), "slecting block id: " + defaultScene.selectedBlock?.ID);
-        GUI.Label(new Rect(20, 50, 180, 20), "connected block id: " + defaultScene.connectedBlock?.ID);
-        //GUI.Label(new Rect(20, 70, 180, 20), "spring force" + defaultScene.selectedBlock?._massPoints[2].CalcForce());
+        GUI.Label(new Rect(20, 30, 180, 20), "slecting block id: " + defaultScene.selectingBlock?.ID);
+        GUI.Label(new Rect(20, 50, 180, 20), "connected block id: " + defaultScene.previousBlock?.ID);
+        //GUI.Label(new Rect(20, 70, 180, 20), "spring force" + defaultScene.selectingBlock?._massPoints[2].CalcForce());
         GUI.Label(new Rect(20, 90, 180, 20), "Message " + defaultScene?.isVisible);
 
     }
@@ -158,39 +163,39 @@ public static class CreateButtonUi
             ↑(テンキー8) : 選択中のブロックを縦に連結
             A(テンキー1) : 選択中のブロックを左下に接続
             */
-            if (defaultScene.selectedBlock != null
-            && defaultScene.connectedBlock != null)
+            if (defaultScene.selectingBlock != null
+            && defaultScene.previousBlock != null)
             {
                 if (ev.keyCode == KeyCode.UpArrow || ev.keyCode == KeyCode.Keypad8)
                 {
                     //Debug.Log("Up arrow key is pressed");
-                    defaultScene.selectedBlock.OnUpKeyPress();
-                    //defaultScene.connectedBlock.OnUpKeyPress();
+                    defaultScene.selectingBlock.OnUpKeyPress();
+                    //defaultScene.previousBlock.OnUpKeyPress();
                 }
                 if (ev.keyCode == KeyCode.LeftArrow || ev.keyCode == KeyCode.Keypad4)
                 {
                     //Debug.Log("Left arrow key is pressed");
-                    defaultScene.selectedBlock.OnLeftKeyPress();
-                    //defaultScene.connectedBlock.OnLeftKeyPress();
+                    defaultScene.selectingBlock.OnLeftKeyPress();
+                    //defaultScene.previousBlock.OnLeftKeyPress();
                 }
                 if (ev.keyCode == KeyCode.RightArrow || ev.keyCode == KeyCode.Keypad6)
                 {
 
                     //Debug.Log("Right arrow key is pressed");
-                    defaultScene.selectedBlock.OnRightKeyPress();
-                    //defaultScene.connectedBlock.OnRightKeyPress();
+                    defaultScene.selectingBlock.OnRightKeyPress();
+                    //defaultScene.previousBlock.OnRightKeyPress();
                 }
                 if (ev.keyCode == KeyCode.A)
                 {
                     //Debug.Log("A key is pressed");
-                    //defaultScene.selectedBlock.OnAKeyPress();
-                    defaultScene.connectedBlock.OnAKeyPress();
+                    //defaultScene.selectingBlock.OnAKeyPress();
+                    defaultScene.previousBlock.OnAKeyPress();
                 }
                 if (ev.keyCode == KeyCode.D)
                 {
                     //Debug.Log("D key is pressed");
-                    defaultScene.selectedBlock.OnRightKeyPress();
-                    //defaultScene.connectedBlock.OnRightKeyPress();
+                    defaultScene.selectingBlock.OnRightKeyPress();
+                    //defaultScene.previousBlock.OnRightKeyPress();
                 }
             }
             if (ev.keyCode == KeyCode.A)
