@@ -19,6 +19,23 @@ public enum ConnectType
     Bottom //未使用
 
 }
+
+/// <summary>
+/// 頂点名(背側を正面とする)
+/// </summary>
+
+public class VertexName
+{
+    public const int LeftPocket = 0; //0
+    public const int LeftEye = 1; // 1
+    public const int LeftLeg = 2; // 2
+    public const int RightPocket = 3; // 3
+    public const int RightEye = 4; // 4
+    public const int RightLeg = 5; // 5
+
+}
+
+
 public enum which
 {
     Left,
@@ -54,8 +71,23 @@ public class Block : MonoBehaviour
     /// <summary>
     /// ブロックの頂点間に貼るバネの初期インデックス(四角形面は対角線上にも張っている)
     /// </summary>
-    readonly int[,] _initialSpringIndex = { { 0, 1 }, { 1, 2 }, { 2, 0 }, { 1, 4 }, { 0, 3 }, { 3, 4 }, { 4, 5 }, { 5, 3 }, { 0, 4 }, { 1, 3 } };
-    readonly int[,] _legSpring = { { 2, 5 } };
+    readonly int[,] _initialSpringIndex = {
+    { VertexName.LeftPocket, VertexName.LeftEye },
+    { VertexName.LeftEye, VertexName.LeftLeg },
+    { VertexName.LeftLeg, VertexName.LeftPocket },
+    { VertexName.LeftEye, VertexName.RightEye },
+    { VertexName.LeftPocket, VertexName.RightPocket },
+    { VertexName.RightPocket, VertexName.RightEye },
+    { VertexName.RightEye, VertexName.RightLeg },
+    { VertexName.RightLeg, VertexName.RightPocket },
+    { VertexName.LeftPocket, VertexName.RightEye },
+    { VertexName.LeftEye, VertexName.RightPocket }
+    };
+    //{ 2, 0 }, { 1, 4 }, { 0, 3 }, { 3, 4 }, { 4, 5 }, { 5, 3 }, { 0, 4 }, { 1, 3 } };
+    /// <summary>
+    /// ブロックの足間に貼るバネの初期インデックス
+    /// </summary>
+    readonly int[,] _legSpring = { { VertexName.LeftLeg, VertexName.RightLeg } };
     /// <summary>
     /// 左足を挿入しているブロック
     /// </summary>
@@ -82,8 +114,12 @@ public class Block : MonoBehaviour
     const float _springConstant = 10.0f;
     [SerializeField] public float _springConstantLeg = 1.0f;
 
-    const float _restLength = 0.1f;
     bool _isDebug = false;//
+    /// <summary>
+    /// プリミティブを構成するブロックかどうか
+    /// </summary>
+    public bool _isJoiningPrimitive = false;
+
     //収束までにかかったステップ数
     [SerializeField]
     public int _step = 0;
@@ -154,16 +190,14 @@ public class Block : MonoBehaviour
     }
 
     /// <summary>
-    /// 毎フレームレンダリングする
+    /// Editモードで毎フレームレンダリングするための処理
     /// </summary>
     private void OnRenderObject()
     {
         if (!Application.isPlaying)
         {
-
             EditorApplication.QueuePlayerLoopUpdate();
             SceneView.RepaintAll();
-
         }
     }
     // Start is called before the first frame update
@@ -666,14 +700,14 @@ public class Block : MonoBehaviour
     {
         if (_massPoints.Count == 0)
         {
-            //Debug.Log("massPoints.Count is 0");
+            //質点数が0の場合はメッシュの頂点座標を取得する
             v.Clear();
             foreach (Vector3 v3 in mesh.vertices)
             {
                 v.Add(transform.TransformPoint(v3));
             }
         }
-        else if (_isAnimatable)
+        else if (_isAnimatable && !_isJoiningPrimitive)
         {
             v.Clear();
             int i = 0;

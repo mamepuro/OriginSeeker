@@ -110,7 +110,6 @@ public static class CreateButtonUi
         //{
         //    _block = LoadDataTable();
         //}
-        // ������ UI��`�悷�鏈�����L�q
         ShowButtons(sceneView.position.size);
         ShowInfoPanel();
         Handles.EndGUI();
@@ -362,6 +361,7 @@ public static class CreateButtonUi
                                             block.defaultScene = defaultScene;
                                             block._isFixed = true;
                                             block._isAnimatable = false;
+                                            block._isJoiningPrimitive = true;
                                             //block.transform.Rotate(0, 180, 0);
                                             ID++;
                                             _blocks.Add(block);
@@ -520,6 +520,7 @@ public static class CreateButtonUi
                                             block.ID = ID;
                                             block.defaultScene = defaultScene;
                                             block._isFixed = true;
+                                            block._isJoiningPrimitive = true;
                                             block._isAnimatable = false;
                                             //block.transform.Rotate(0, 180, 0);
                                             ID++;
@@ -675,6 +676,7 @@ public static class CreateButtonUi
                                     block.SetVertices();
                                     block.ID = ID;
                                     block.defaultScene = defaultScene;
+                                    block._isJoiningPrimitive = true;
                                     block._isFixed = true;
                                     block._isAnimatable = false;
                                     ID++;
