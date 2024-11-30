@@ -1169,7 +1169,7 @@ public static class CreateButtonUi
                     block.mesh = mesh;
                     if (_blocks.Count != 0)
                     {
-                        obj.transform.position = _blocks[ID - 1].transform.position + new Vector3(margin * 5, 0, 0);
+                        obj.transform.position = _blocks[_blocks.Count - 1].transform.position + new Vector3(margin * 5, 0, 0);
                     }
                     block.SetVertices();
                     block.defaultScene = defaultScene;

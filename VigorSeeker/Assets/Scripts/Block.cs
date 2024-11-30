@@ -217,6 +217,11 @@ public class Block : MonoBehaviour
     {
         UpdateVertices();
     }
+    public void OnDestroy()
+    {
+        Debug.Log("Block is destroyed");
+        CreateButtonUi._blocks.Remove(this);
+    }
     public void SetVertices()
     {
         if (this.mesh != null)
