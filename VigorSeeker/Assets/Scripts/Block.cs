@@ -1136,8 +1136,8 @@ public class Block : MonoBehaviour
             _tmpVertices[thisBlockLegIndex] =
             crossLocal.normalized * LegLengthLocal + _tmpVertices[thisBlockPocketIndex];
             //_massPoints[VertexName.RightLeg]._position = new Vector3(_massPoints[VertexName.RightPocket]._position.x, _massPoints[VertexName.RightLeg]._position.y, _massPoints[VertexName.RightLeg]._position.z);
-            _massPoints[thisBlockLegIndex]._position = cross.normalized * LegLength + _massPoints[thisBlockPocketIndex]._position;
-            int j = 0;
+            _massPoints[thisBlockLegIndex]._position =
+            cross.normalized * LegLength + _massPoints[thisBlockPocketIndex]._position;
         }
 
         //左ポケット部分は固定点とする
