@@ -1059,9 +1059,14 @@ public static class CreateButtonUi
                 }
             }
             /*
-            ← : 右脚を左ポケットに
-            → : 左脚を右ポケットに
-            ↑ : 縦に連結
+            【How to use】
+            背側を前，目側を裏と定義する(従って，背側の右ポケットが右ポケットとなる)
+            */
+            /*
+            ←(テンキー4) : [wip]選択中のブロックを左上に接続
+            →(テンキー9) : 選択中のブロックを右上に接続(選択中ブロックの左ポケットに接続対象ブロック右脚を挿入)
+            ↑(テンキー8) : 選択中のブロックを縦に連結
+            A(テンキー1) : 選択中のブロックを左下に接続
             */
             if (defaultScene.focusedBlock != null
             && defaultScene.previousBlock != null)
@@ -1079,10 +1084,12 @@ public static class CreateButtonUi
                     defaultScene.focusedBlock.OnLeftKeyPress();
                     //defaultScene.connectedBlock.OnLeftKeyPress();
                 }
-                if (ev.keyCode == KeyCode.RightArrow)
+                if (ev.keyCode == KeyCode.RightArrow || ev.keyCode == KeyCode.Keypad9 || ev.keyCode == KeyCode.Alpha9)
                 {
                     //Debug.Log("Right arrow key is pressed");
-                    defaultScene.focusedBlock.OnRightKeyPress();
+                    defaultScene.focusedBlock.ConnectFocusedBlockWithPreviousBlock(
+                        defaultScene.previousBlock,
+                        ConnectDirection.UpperRight);
                     //defaultScene.connectedBlock.OnRightKeyPress();
                 }
                 if (ev.keyCode == KeyCode.A)
