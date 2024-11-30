@@ -8,7 +8,7 @@ public class DefaultScene : MonoBehaviour
     /// <summary>[
     /// 選択中のブロック
     /// </summary>
-    public Block selectingBlock;
+    public Block focusedBlock;
     /// <summary>
     /// 接続対象のブロック(1つ前の操作で選択していたブロック)
     /// </summary>
