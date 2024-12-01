@@ -24,6 +24,11 @@ public class MassPoint : MonoBehaviour
     [SerializeField] public Vector3 _acc;
     [SerializeField] public float move;
     [SerializeField] public int step;
+    /// <summary>
+    /// 質点が他の面に合体しているかどうか
+    /// (注:このフラグは、被挿入ブロックの被挿入面のポケット及び目の質点のみtrueになる)
+    /// </summary>
+    [SerializeField] public bool _isMerged = false;
     //[SerializeField] public Vector3 _gravity = new Vector3(0, -9.8f, 0);
     /// <summary>
     /// 質点の固定フラグ
