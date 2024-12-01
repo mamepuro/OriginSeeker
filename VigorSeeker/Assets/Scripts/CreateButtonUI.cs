@@ -158,15 +158,8 @@ public static class CreateButtonUi
                     //Debug.Log("Up arrow key is pressed");
                     defaultScene.focusedBlock.OnUpKeyPress();
                     //defaultScene.connectedBlock.OnUpKeyPress();
-
                 }
-                if (ev.keyCode == KeyCode.LeftArrow)
-                {
-                    //Debug.Log("Left arrow key is pressed");
-                    defaultScene.focusedBlock.OnLeftKeyPress();
-                    //defaultScene.connectedBlock.OnLeftKeyPress();
-                }
-                if (ev.keyCode == KeyCode.RightArrow || ev.keyCode == KeyCode.Keypad9 || ev.keyCode == KeyCode.Alpha9)
+                if (ev.keyCode == KeyCode.Keypad9 || ev.keyCode == KeyCode.Alpha9)
                 {
                     //Debug.Log("Right arrow key is pressed");
                     defaultScene.focusedBlock.ConnectFocusedBlockWithPreviousBlock(
@@ -180,23 +173,18 @@ public static class CreateButtonUi
                         defaultScene.previousBlock,
                         ConnectDirection.UpperLeft);
                 }
-                if (ev.keyCode == KeyCode.A)
+                if (ev.keyCode == KeyCode.Keypad1 || ev.keyCode == KeyCode.Alpha1)
                 {
-                    Debug.Log("A key is pressed");
-                    //defaultScene.selectedBlock.OnAKeyPress();
-                    defaultScene.previousBlock.OnAKeyPress();
+                    defaultScene.previousBlock.ConnectFocusedBlockWithPreviousBlock(
+                        defaultScene.focusedBlock,
+                        ConnectDirection.UpperLeft);
                 }
-                if (ev.keyCode == KeyCode.D)
+                if (ev.keyCode == KeyCode.Keypad3 || ev.keyCode == KeyCode.Alpha3)
                 {
-                    Debug.Log("D key is pressed");
-                    defaultScene.focusedBlock.OnRightKeyPress();
-                    //defaultScene.connectedBlock.OnRightKeyPress();
+                    defaultScene.previousBlock.ConnectFocusedBlockWithPreviousBlock(
+                        defaultScene.focusedBlock,
+                        ConnectDirection.UpperRight);
                 }
-            }
-            if (ev.keyCode == KeyCode.A)
-            {
-                Debug.Log("A key is pressed!!!");
-                //defaultScene.isVisible = !defaultScene.isVisible;
             }
         }
     }
