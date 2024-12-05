@@ -39,7 +39,7 @@ public class VertexName
 public class Block : MonoBehaviour
 {
     [SerializeField] public Mesh mesh;
-    [SerializeField] List<Vector3> v;
+    [SerializeField] public List<Vector3> v;
     [SerializeField] public int ID;
     /// <summary>
     /// 新しく頂点を追加するための一時的な頂点リスト
@@ -59,8 +59,6 @@ public class Block : MonoBehaviour
     DefaultScene defaultScene;
     bool initial = true;
     float initTime = 0;
-    const int _leftLegIndex = 2;
-    const int _rightLegIndex = 5;
     /// <summary>
     /// ブロックの頂点間に貼るバネの初期インデックス(四角形面は対角線上にも張っている)
     /// </summary>
@@ -134,6 +132,8 @@ public class Block : MonoBehaviour
     [SerializeField] public int _rootLeftPocketBlockVertexName = -1;
     [SerializeField] public float _margin = 0.08533333333f;
 
+
+
     const float _dampingConstant = 0;
     const float _springConstant = 10.0f;
     [SerializeField] public float _springConstantLeg = 10.0f;
@@ -178,7 +178,7 @@ public class Block : MonoBehaviour
     }
     public void OnDestroy()
     {
-        Debug.Log("Block is destroyed");
+        //Debug.Log("Block is destroyed");
         CreateButtonUi._blocks.Remove(this);
     }
     public void SetVertices()
@@ -200,8 +200,6 @@ public class Block : MonoBehaviour
     /// </summary>
     public void TransformInsertionModel()
     {
-        Debug.Log("TransformInsertionModel is called");
-        Debug.Log("On Space key is pressed");
         int i = 0;
         foreach (var vertex in mesh.vertices)
         {
@@ -256,9 +254,9 @@ public class Block : MonoBehaviour
     {
 
     }
-    void UpdateVertices()
+    public void UpdateVertices()
     {
-        if (_massPoints.Count == 0)
+        if (_isJoiningPrimitive)
         {
             //Debug.Log("massPoints.Count is 0");
             v.Clear();
@@ -266,8 +264,10 @@ public class Block : MonoBehaviour
             {
                 v.Add(transform.TransformPoint(v3));
             }
+            //var pivot = transform.parent.gameObject;
+            //pivot.transform.position = this.v[VertexName.RightPocket];
         }
-        else if (_isAnimatable)
+        else if (_isAnimatable && !_isJoiningPrimitive)
         {
             v.Clear();
             int i = 0;
@@ -420,6 +420,10 @@ public class Block : MonoBehaviour
     }
     void Initiate()
     {
+        if (this._isJoiningPrimitive)
+        {
+            return;
+        }
         //リストの初期化
         _springs = new List<Spring>();
         _massPoints = new List<MassPoint>();
