@@ -50,6 +50,8 @@ public class Block : MonoBehaviour
     [SerializeField] public bool _isFixed = false;
     [SerializeField] public bool _isAnimatable = true;
     [SerializeField] public bool _isJoiningPrimitive = false;
+    [SerializeField] public int column = -1;
+    [SerializeField] public int row = -1;
     [SerializeField] int _unionID = -1;
     /// <summary>
     /// シーンマネージャーへの参照
@@ -258,14 +260,12 @@ public class Block : MonoBehaviour
     {
         if (_isJoiningPrimitive)
         {
-            //Debug.Log("massPoints.Count is 0");
+
             v.Clear();
-            foreach (Vector3 v3 in mesh.vertices)
+            foreach (Vector3 v3 in _tmpVertices)
             {
                 v.Add(transform.TransformPoint(v3));
             }
-            //var pivot = transform.parent.gameObject;
-            //pivot.transform.position = this.v[VertexName.RightPocket];
         }
         else if (_isAnimatable && !_isJoiningPrimitive)
         {

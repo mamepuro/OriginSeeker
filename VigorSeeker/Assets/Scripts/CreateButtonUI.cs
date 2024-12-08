@@ -331,7 +331,10 @@ public static class CreateButtonUi
                                         //radius = radius - 2.0f;
                                         //Debug.Log("radius is " + radius);
 
-                                        block.transform.position = new Vector3(c_Transform.position.x, c_Transform.position.y - shape[0].m_Size.y / 2 + c * _margin, c_Transform.position.z - radius);
+                                        block.transform.position = new Vector3(
+                                            c_Transform.position.x,
+                                            c_Transform.position.y - shape[0].m_Size.y / 2 + c * _margin,
+                                            c_Transform.position.z - radius);
                                         //block.transform.RotateAround(block.transform.position, Vector3.up, 180.0f);
                                         if (c % 2 == 0)
                                         {
@@ -433,65 +436,6 @@ public static class CreateButtonUi
                                         block.transform.RotateAround(c_Transform.position, Vector3.up, 360.0f / (float)rowSize * (float)r + 180.0f / (float)rowSize);
                                         //Debug.Log("rotate around " + 360 / row * r);
                                     }
-                                    if (!isDebug)
-                                    {
-                                        if (c != 0)
-                                        {
-                                            //ブロックに差し込む
-                                            if (c % 2 == 0)
-                                            {
-                                                int myIndex = ID - 1;
-                                                var rightPocket = _blocks[myIndex - rowSize];
-                                                var leftIndex = myIndex - rowSize - 1;
-                                                if (r == 0)
-                                                {
-                                                    leftIndex = myIndex - 1;
-                                                }
-                                                var leftPocket = _blocks[leftIndex];
-                                                block._rightPocketInsertingBlock.Add(rightPocket);
-                                                block._leftPocketInsertingBlock.Add(leftPocket);
-                                                var spring = obj.AddComponent<Spring>();
-                                                var spring2 = obj.AddComponent<Spring>();
-                                                var massPoint1 = block._massPoints[2];
-                                                var massPoint2 = leftPocket._massPoints[2];
-                                                //TODO: distanceは遅いのでmagintudeを使う
-                                                var initialLength1 = Vector3.Distance(massPoint1._position, massPoint2._position);
-                                                spring.SetSpring(massPoint1, massPoint2,
-                                                10.0f, springLength: initialLength1, 20.0f, 1.0f, springType: SpringType.Block);
-                                                block._springs.Add(spring);
-                                                massPoint1.AddSpring(spring);
-                                                massPoint2.AddSpring(spring);
-                                                //TODO: springsの追加は本当にこれでOKか？
-                                            }
-                                            //ブロックに差し込む
-                                            if (c % 2 == 1)
-                                            {
-                                                int myIndex = ID - 1;
-                                                var rightIndex = myIndex - rowSize + 1;
-                                                var leftIndex = myIndex - rowSize;
-                                                if (r == rowSize - 1)
-                                                {
-                                                    rightIndex = myIndex - rowSize - rowSize + 1;
-                                                }
-                                                var leftPocket = _blocks[leftIndex];
-                                                var rightPocket = _blocks[rightIndex];
-                                                block._rightPocketInsertingBlock.Add(rightPocket);
-                                                block._leftPocketInsertingBlock.Add(leftPocket);
-                                                var spring = obj.AddComponent<Spring>();
-                                                var spring2 = obj.AddComponent<Spring>();
-                                                var massPoint1 = block._massPoints[5];
-                                                var massPoint2 = leftPocket._massPoints[5];
-                                                //TODO: distanceは遅いのでmagintudeを使う
-                                                var initialLength1 = Vector3.Distance(massPoint1._position, massPoint2._position);
-                                                spring.SetSpring(massPoint1, massPoint2,
-                                                10.0f, springLength: initialLength1, 20.0f, 1.0f, springType: SpringType.Block);
-                                                block._springs.Add(spring);
-                                                massPoint1.AddSpring(spring);
-                                                massPoint2.AddSpring(spring);
-                                                //TODO: springsの追加は本当にこれでOKか？
-                                            }
-                                        }
-                                    }
                                 }
                             }
                         }
@@ -507,7 +451,26 @@ public static class CreateButtonUi
                     var c_Transform = Selection.activeGameObject.transform;
                     var row = GetRow(shape[0].m_Size);
                     //列数は6固定
-                    var column = 6;
+                    var column = 2;
+                    //columnを求める
+                    while (true)
+                    {
+                        float LegLength = 2.0f;
+                        float cos = 0;
+                        for (int j = 1; j < column; j++)
+                        {
+                            cos += Mathf.Cos(MathF.Abs(-MathF.PI / 4 + MathF.PI * 7 / (12 * (column - 1)) * (j - 1)));
+                        }
+                        float height = LegLength * Mathf.Sin(MathF.PI / 4)
+                                       + LegLength * Mathf.Cos(MathF.PI / 3)
+                                       + margin * cos;
+
+                        if (height > shape[0].m_Size.y || column > 30)
+                        {
+                            break;
+                        }
+                        column++;
+                    }
                     if (row == -1 || column == -1)
                     {
                         Debug.Log("Error: row or column is not correct");
@@ -521,7 +484,7 @@ public static class CreateButtonUi
                         var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefab/blockv1.prefab");
                         var parent = new GameObject("parent");
                         parent.transform.position = c_Transform.position;
-                        //var scale = AdjustScale(shape[0].m_Size, ref column);
+                        var scale = AdjustScale(shape[0].m_Size, ref column);
                         if (prefab != null)
                         {
                             for (int c = 0; c < column; c++)
@@ -576,7 +539,7 @@ public static class CreateButtonUi
                                         block.transform.position = new Vector3(
                                             c_Transform.position.x,
                                             c_Transform.position.y - shape[0].m_Size.x / 2 * (1 / Mathf.Sqrt(2)),
-                                            c_Transform.position.z - shape[0].m_Size.x / 2 * (1 / Mathf.Sqrt(2)));
+                                            c_Transform.position.z - shape[0].m_Size.x / 2 * (1 / Mathf.Sqrt(2)) - (1 / Mathf.Sqrt(2)));
                                         //block.transform.RotateAround(block.transform.position, Vector3.up, 180.0f);
                                         if (c % 2 == 0)
                                         {
@@ -585,7 +548,8 @@ public static class CreateButtonUi
                                         }
                                         else
                                         {
-                                            block.transform.RotateAround(c_Transform.position, block.transform.up, 360.0f / (float)rowSize * (float)r + 180.0f / (float)rowSize);
+                                            //block.transform.RotateAround(c_Transform.position, block.transform.up, 360.0f / (float)rowSize * (float)r + 180.0f / (float)rowSize);
+                                            block.transform.RotateAround(c_Transform.position, block.transform.up, 360.0f / (float)rowSize * (float)r);
                                             //Debug.Log("rotate around " + 360 / row * r);
                                         }
                                         block.UpdateVertices();
@@ -593,52 +557,31 @@ public static class CreateButtonUi
                                         //transform.rightはローカル座標系の右方向を示す(Vector3.rightはグローバル座標系の右方向を示すので注意)
                                         block.transform.RotateAround(block.v[VertexName.RightPocket], block.transform.right, -45);
                                         block.UpdateVertices();
-                                        bool a = false;
+                                        block.column = c;
+                                        block.row = r;
+                                        float degree = (45 + 30) / column;
                                         if (c > 0)
                                         {
-                                            if ((ID - 1) % 35 == 0)
-                                            {
-                                                obj.SetActive(true);
-                                            }
                                             block.UpdateVertices();
                                             Vector3 moveVector = (_blocks[block.ID - 35].v[VertexName.RightLeg] - _blocks[block.ID - 35].v[VertexName.RightPocket]).normalized;
                                             block.transform.position = _blocks[block.ID - 35].transform.position
                                                                      + moveVector * margin;
-                                            if (ID == 72 || ID == 107)
-                                            {
-                                                block.transform.position = _blocks[block.ID - 36].transform.position
-                                                                    + (_blocks[block.ID - 36].v[VertexName.RightLeg] - _blocks[block.ID - 36].v[VertexName.RightPocket]).normalized * margin;
-                                            }
+                                            block.transform.rotation = _blocks[block.ID - 35].transform.rotation;
                                             block.UpdateVertices();
-                                            if ((ID - 1) % 35 == 0)
-                                            {
-                                                obj.SetActive(true);
-                                            }
-                                            if (ID != 72 || ID != 107)
-                                            {
-                                                block.transform.RotateAround(block.v[VertexName.RightPocket], block.transform.right, 15 * c);
-                                            }
-
-
-                                            //
+                                            block.transform.RotateAround(block.v[VertexName.LeftPocket], block.transform.right, degree);
                                             block.UpdateVertices();
-                                            if (ID == 72 || ID == 107)
-                                            {
-                                                a = true;
-                                            }
                                         }
-                                        if ((ID - 1) % 35 != 0 && !a)
-                                        {
-                                            obj.SetActive(false);
 
-                                        }
                                         //pivot.transform.position = block.transform.TransformPoint(block.v[VertexName.RightPocket]);
                                         obj.transform.parent = col.transform;
                                     }
+
                                     else
                                     {
                                         radius = 0.0f;
                                     }
+
+                                    block.UpdateVertices();
                                 }
                             }
                         }
@@ -759,6 +702,7 @@ public static class CreateButtonUi
         //Debug.Log("size is " + size);
         return size;
     }
+
 
     public static float ChangeBlockVallySize(Vector3 cylinderSize, Block block)
     {
