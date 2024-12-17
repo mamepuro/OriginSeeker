@@ -664,7 +664,7 @@ public class Block : MonoBehaviour
             case ConnectDirection.LowerLeft:
                 for (int i = 0; i < vertices.Length; i++)
                 {
-                    if (i == 2)
+                    if (i == VertexName.RightLeg)
                     {
                         _massPoints.Add(refBlock._massPoints[VertexName.LeftLeg]);
                     }
@@ -674,7 +674,7 @@ public class Block : MonoBehaviour
                         var massPoint = gameObject.AddComponent<MassPoint>();
                         massPoint.SetMassSpring(30.0f, Vector3.zero, i, transform.TransformPoint(vertices[i]), this);
                         _massPoints.Add(massPoint);
-                        if (i == 0 || i == 1)
+                        if (i == VertexName.RightEye || i == VertexName.RightPocket)
                         {
                             massPoint._isFixed = true;
                         }
@@ -908,8 +908,8 @@ public class Block : MonoBehaviour
                 previousAnotherBlockEyeIndex = VertexName.RightEye;
 
                 //接続情報の設定・更新
-                this._leftLegInsertingBlock = previous;
-                this._leftLegInsertingBlockID = previous.ID;
+                this._rightLegInsertingBlock = previous;
+                this._rightLegInsertingBlockID = previous.ID;
                 previous._leftPocketInsertingBlock.Add(this);
 
                 //previousの右ポケットに脚を挿入しているブロックがある場合はこのブロックがrootである
@@ -921,12 +921,68 @@ public class Block : MonoBehaviour
                 {
                     previous._rootLeftPocketBlock = this;
                     previous._rootLeftPocketBlockID = this.ID;
-                    previous._rootRightPocketBlockVertexName = VertexName.RightLeg;
+                    previous._rootLeftPocketBlockVertexName = VertexName.RightLeg;
                 }
 
                 //移動方向の設定
                 moveVector = new Vector3(blockVallaySize, -_margin, 0);
                 corssDirection = -1;
+                break;
+            case ConnectDirection.UP:
+                //頂点情報の設定 
+                thisBlockLegIndex = VertexName.LeftLeg;
+                previousBlockLegIndex = VertexName.LeftLeg;
+                thisBlockPocketIndex = VertexName.LeftPocket;
+                previousBlockPocketIndex = VertexName.LeftPocket;
+                thisBlockEyeIndex = VertexName.LeftEye;
+                previousBlockEyeIndex = VertexName.LeftEye;
+
+                thisAnotherBlockLegIndex = VertexName.RightLeg;
+                previousAnotherBlockLegIndex = VertexName.RightLeg;
+                thisAnothreBlockPocketIndex = VertexName.RightPocket;
+                previousAnotherBlockPocketIndex = VertexName.RightPocket;
+                thisAnotherBlockEyeIndex = VertexName.RightEye;
+                previousAnotherBlockEyeIndex = VertexName.RightEye;
+
+                //接続情報の設定・更新
+                this._leftPocketInsertingBlock.Add(previous);
+                this._rightPocketInsertingBlock.Add(previous);
+                previous._rightLegInsertingBlock = this;
+                previous._rightLegInsertingBlockID = this.ID;
+                previous._leftLegInsertingBlock = this;
+                previous._leftLegInsertingBlockID = this.ID;
+                //previousの右ポケットに脚を挿入しているブロックがある場合はrootの情報を移譲する
+                if (previous._rootRightPocketBlock != null)
+                {
+                    this._rootRightPocketBlock = previous._rootLeftPocketBlock;
+                    this._rootRightPocketBlockID = previous._rootLeftPocketBlock.ID;
+                    this._rootRightPocketBlockVertexName = previous._rootLeftPocketBlockVertexName;
+                }
+                //挿入しているブロックがない場合、previousがrootである
+                else
+                {
+                    this._rootLeftPocketBlock = previous;
+                    this._rootLeftPocketBlockID = previous.ID;
+                    //previousの右脚を挿入するので右脚の頂点を登録する
+                    this._rootLeftPocketBlockVertexName = VertexName.RightLeg;
+                }
+                if (previous._rootLeftPocketBlock != null)
+                {
+                    this._rootLeftPocketBlock = previous._rootRightPocketBlock;
+                    this._rootLeftPocketBlockID = previous._rootRightPocketBlock.ID;
+                    this._rootLeftPocketBlockVertexName = previous._rootRightPocketBlockVertexName;
+                }
+                //挿入しているブロックがない場合、previousがrootである
+                else
+                {
+                    this._rootLeftPocketBlock = previous;
+                    this._rootLeftPocketBlockID = previous.ID;
+                    //previousの右脚を挿入するので右脚の頂点を登録する
+                    this._rootLeftPocketBlockVertexName = VertexName.RightLeg;
+                }
+
+                //移動方向の設定
+                moveVector = new Vector3(-blockVallaySize, _margin, 0);
                 break;
         }
         if (connectDirection == ConnectDirection.UpperRight

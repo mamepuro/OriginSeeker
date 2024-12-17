@@ -175,17 +175,23 @@ public static class CreateButtonUi
                         defaultScene.previousBlock,
                         ConnectDirection.UpperLeft);
                 }
+                if (ev.keyCode == KeyCode.Keypad8 || ev.keyCode == KeyCode.Alpha8)
+                {
+                    defaultScene.focusedBlock.ConnectFocusedBlockWithPreviousBlock(
+                        defaultScene.previousBlock,
+                        ConnectDirection.UP);
+                }
                 if (ev.keyCode == KeyCode.Keypad1 || ev.keyCode == KeyCode.Alpha1)
                 {
-                    defaultScene.previousBlock.ConnectFocusedBlockWithPreviousBlock(
+                    defaultScene.focusedBlock.ConnectFocusedBlockWithPreviousBlock(
                         defaultScene.focusedBlock,
-                        ConnectDirection.UpperLeft);
+                        ConnectDirection.LowerLeft);
                 }
                 if (ev.keyCode == KeyCode.Keypad3 || ev.keyCode == KeyCode.Alpha3)
                 {
-                    defaultScene.previousBlock.ConnectFocusedBlockWithPreviousBlock(
+                    defaultScene.focusedBlock.ConnectFocusedBlockWithPreviousBlock(
                         defaultScene.focusedBlock,
-                        ConnectDirection.UpperRight);
+                        ConnectDirection.LowerRight);
                 }
             }
         }
