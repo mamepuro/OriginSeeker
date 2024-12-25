@@ -35,7 +35,8 @@ public class Spring : MonoBehaviour
     [SerializeField] public Vector2 _initVector;
     [SerializeField] public bool _isLeg = false;
     [SerializeField] public float currentLength;
-
+    [SerializeField] public float _r;
+    [SerializeField] Vector3 _force;
     void OnEnable()
     {
         //Debug.Log("Info: Spring awaked.");
@@ -78,6 +79,7 @@ public class Spring : MonoBehaviour
         {
             //Debug.Log("left mass point");
             Vector3 r = _rightMassPoint._position - _leftMassPoint._position;
+            this._r = r.x;
             Vector3 v = _rightMassPoint._velocity - _leftMassPoint._velocity;
             Vector2 vec = new Vector2(r.x, r.y).normalized;
             //向きが反対
@@ -90,6 +92,7 @@ public class Spring : MonoBehaviour
                 force = _springConstant * (r.magnitude - _springLength) * r.normalized + _dampingConstant * v;
             }
             //force = _springConstant * (r.magnitude - _springLength) * r.normalized + _dampingConstant * v;
+            _force = force;
             return force;
             //自動生成したコード
             // Vector3 direction = _rightMassPoint._position - _leftMassPoint._position;
@@ -116,6 +119,7 @@ public class Spring : MonoBehaviour
                 force = _springConstant * (r.magnitude - _springLength) * r.normalized + _dampingConstant * v;
             }
             //force = _springConstant * (r.magnitude - _springLength) * r.normalized + _dampingConstant * v;
+            _force = force;
             return force;
             //自動生成したコード
             //　間違っているかもしれないので注意

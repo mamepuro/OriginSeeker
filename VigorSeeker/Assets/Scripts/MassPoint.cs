@@ -37,7 +37,7 @@ public class MassPoint : MonoBehaviour
     /// <summary>
     /// この質点に接続されているばね
     /// </summary>
-    [SerializeField] List<Spring> _springs;
+    [SerializeField] public List<Spring> _springs;
     // Start is called before the first frame update
     void OnEnable()
     {

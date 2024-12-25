@@ -184,13 +184,13 @@ public static class CreateButtonUi
                 if (ev.keyCode == KeyCode.Keypad1 || ev.keyCode == KeyCode.Alpha1)
                 {
                     defaultScene.focusedBlock.ConnectFocusedBlockWithPreviousBlock(
-                        defaultScene.focusedBlock,
+                        defaultScene.previousBlock,
                         ConnectDirection.LowerLeft);
                 }
                 if (ev.keyCode == KeyCode.Keypad3 || ev.keyCode == KeyCode.Alpha3)
                 {
                     defaultScene.focusedBlock.ConnectFocusedBlockWithPreviousBlock(
-                        defaultScene.focusedBlock,
+                        defaultScene.previousBlock,
                         ConnectDirection.LowerRight);
                 }
             }
