@@ -193,6 +193,18 @@ public static class CreateButtonUi
                         defaultScene.previousBlock,
                         ConnectDirection.LowerRight);
                 }
+                if (ev.keyCode == KeyCode.Keypad4 || ev.keyCode == KeyCode.Alpha4)
+                {
+                    defaultScene.focusedBlock.ConnectFocusedBlockWithPreviousBlock(
+                        defaultScene.previousBlock,
+                        ConnectDirection.Left);
+                }
+                if (ev.keyCode == KeyCode.Keypad6 || ev.keyCode == KeyCode.Alpha6)
+                {
+                    defaultScene.focusedBlock.ConnectFocusedBlockWithPreviousBlock(
+                        defaultScene.previousBlock,
+                        ConnectDirection.Right);
+                }
             }
         }
     }
@@ -268,7 +280,7 @@ public static class CreateButtonUi
                     _blocks.Add(block);
                 }
             }
-            if (GUI.Button(rect2, "cylinder"))
+            if (GUI.Button(rect2, "円柱"))
             {
 
                 if (Selection.gameObjects.Length == 1
@@ -364,7 +376,7 @@ public static class CreateButtonUi
                     }
                 }
             }
-            if (GUI.Button(rect3, "pipe"))
+            if (GUI.Button(rect3, "円錐"))
             {
                 Debug.Log("convert to block");
                 if (Selection.gameObjects.Length == 1
@@ -448,7 +460,7 @@ public static class CreateButtonUi
                     }
                 }
             }
-            if (GUI.Button(rect4, "sphere"))
+            if (GUI.Button(rect4, "球"))
             {
                 if (Selection.gameObjects.Length == 1
                 && Selection.activeGameObject.GetComponent<ProBuilderShape>() != null)
