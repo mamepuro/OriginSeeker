@@ -100,7 +100,10 @@ public class MassPoint : MonoBehaviour
             _velocity += (acc * dt);
             move = (_velocity * dt).magnitude;
             _position = _position + _velocity * dt;
-            step++;
+            if(!this._isFixed)
+            {
+                step++;
+            }
         }
 
     }

@@ -333,13 +333,19 @@ public class Block : MonoBehaviour
             else if (_leftPocketInsertingBlock.Count != 0
             && _rightPocketInsertingBlock.Count != 0)
             {
+                if(ID == 2)
+                {
+                    int a =0;
+                }
+                if(_leftPocketInsertingBlock[0].ID == _rightPocketInsertingBlock[0].ID)
+                {
                 foreach (var m in _massPoints)
                 {
-                    if ((i == 0 || i == 1))
+                    if ((i == VertexName.RightPocket || i == 1))
                     {
                         //ポケットから脚に向かうベクトル　* _margin分をポケットの頂点座標に固定する
-                        var pos = (_rightPocketInsertingBlock[0]._massPoints[VertexName.LeftLeg]._position - _rightPocketInsertingBlock[0]._massPoints[VertexName.LeftPocket]._position).normalized * _margin
-                        + _rightPocketInsertingBlock[0]._massPoints[i + 3]._position;
+                        var pos = (_rightPocketInsertingBlock[0]._massPoints[VertexName.RightLeg]._position - _rightPocketInsertingBlock[0]._massPoints[VertexName.RightPocket]._position).normalized * _margin
+                        + _rightPocketInsertingBlock[0]._massPoints[i]._position;
                         _massPoints[i]._position = pos;
                         v.Add(pos);
                         //ワールド座標からローカル座標に変換する
@@ -349,7 +355,8 @@ public class Block : MonoBehaviour
                     else if ((i == 3 || i == 4))
                     {
                         //ポケットから脚に向かうベクトル　* _margin分をポケットの頂点座標に固定する
-                        var pos = (_leftPocketInsertingBlock[0]._massPoints[VertexName.RightLeg]._position - _leftPocketInsertingBlock[0]._massPoints[VertexName.RightPocket]._position).normalized * _margin + _leftPocketInsertingBlock[0]._massPoints[i - 3]._position;
+                        var pos = (_leftPocketInsertingBlock[0]._massPoints[VertexName.LeftLeg]._position - _leftPocketInsertingBlock[0]._massPoints[VertexName.LeftPocket]._position).normalized * _margin 
+                        + _leftPocketInsertingBlock[0]._massPoints[i]._position;
                         _massPoints[i]._position = pos;
                         v.Add(pos);
                         //ワールド座標からローカル座標に変換する
@@ -363,6 +370,42 @@ public class Block : MonoBehaviour
                         _tmpVertices[i] = transform.InverseTransformPoint(m._position);
                         i++;
                     }
+                }
+                }
+                else
+                {
+                    foreach (var m in _massPoints)
+                    {
+                        if ((i == 0 || i == 1))
+                        {
+                            //ポケットから脚に向かうベクトル　* _margin分をポケットの頂点座標に固定する
+                            var pos = (_rightPocketInsertingBlock[0]._massPoints[VertexName.LeftLeg]._position - _rightPocketInsertingBlock[0]._massPoints[VertexName.LeftPocket]._position).normalized * _margin
+                            + _rightPocketInsertingBlock[0]._massPoints[i + 3]._position;
+                            _massPoints[i]._position = pos;
+                            v.Add(pos);
+                            //ワールド座標からローカル座標に変換する
+                            _tmpVertices[i] = transform.InverseTransformPoint(pos);
+                            i++;
+                        }
+                        else if ((i == 3 || i == 4))
+                        {
+                            //ポケットから脚に向かうベクトル　* _margin分をポケットの頂点座標に固定する
+                            var pos = (_leftPocketInsertingBlock[0]._massPoints[VertexName.RightLeg]._position - _leftPocketInsertingBlock[0]._massPoints[VertexName.RightPocket]._position).normalized * _margin + _leftPocketInsertingBlock[0]._massPoints[i - 3]._position;
+                            _massPoints[i]._position = pos;
+                            v.Add(pos);
+                            //ワールド座標からローカル座標に変換する
+                            _tmpVertices[i] = transform.InverseTransformPoint(pos);
+                            i++;
+                        }
+                        else
+                        {
+                            v.Add(m._position);
+                            //ワールド座標からローカル座標に変換する
+                            _tmpVertices[i] = transform.InverseTransformPoint(m._position);
+                            i++;
+                        }
+                    }
+
                 }
             }
             else
@@ -845,6 +888,68 @@ public class Block : MonoBehaviour
                     massPoint2.AddSpring(spring);
                 }
                 break;
+            case ConnectDirection.UP:
+                for (int i = 0; i < vertices.Length; i++)
+                {
+
+                    if (i == 2)
+                    {
+                        _massPoints.Add(refBlock._massPoints[VertexName.RightLeg]);
+                    }
+                    else if (i == 5)
+                    {
+
+                        _massPoints.Add(refBlock._massPoints[VertexName.LeftLeg]);
+                    }
+                    else
+                    {
+                        _massPoints.Add(_tmpmass[i]);
+                        // if (i == 0 || i == 1)
+                        // {
+                        //     _massPoints[i]._isFixed = true;
+                        // }
+                    }
+
+
+
+                    _massPoints[i]._springs.Clear();
+                }
+                for (int i = 0; i < _initialSpringIndex.GetLength(0); i++)
+                {
+                    var spring = gameObject.AddComponent<Spring>();
+                    var massPoint1 = _massPoints[_initialSpringIndex[i, 0]];
+                    var massPoint2 = _massPoints[_initialSpringIndex[i, 1]];
+                    //TODO: distanceは遅いのでmagintudeを使う
+                    var initialLength = Vector3.Distance(massPoint1._position, massPoint2._position);
+                    spring.SetSpring(massPoint1, massPoint2,
+                    _springConstant, springLength: initialLength, 20.0f, 1.0f, springType: SpringType.Block);
+                    _springs.Add(spring);
+                    massPoint1.AddSpring(spring);
+                    massPoint2.AddSpring(spring);
+                }
+                for (int i = 0; i < _legSpring.GetLength(0); i++)
+                {
+                    var spring = gameObject.AddComponent<Spring>();
+                    var massPoint1 = _massPoints[_legSpring[i, 0]];
+                    var massPoint2 = _massPoints[_legSpring[i, 1]];
+                    var initialLength = Vector3.Distance(massPoint1._position, massPoint2._position);
+                    spring.SetSpring(massPoint1, massPoint2,
+                    _springConstantLeg, springLength: initialLength, 20.0f, 1.0f, springType: SpringType.Leg);
+                    _springs.Add(spring);
+                    massPoint1.AddSpring(spring);
+                    massPoint2.AddSpring(spring);
+                }
+                foreach (var m in _massPoints)
+                {
+                    v.Add(m._position);
+                    //ワールド座標からローカル座標に変換する
+                    _tmpVertices[m._index] = transform.InverseTransformPoint(m._position);
+                }
+                mesh.SetVertices(_tmpVertices);
+                mesh.RecalculateBounds();
+                mesh.RecalculateNormals();
+                mesh.RecalculateTangents();
+                break;
             default:
                 break;
         }
@@ -858,21 +963,20 @@ public class Block : MonoBehaviour
     /// <param name="vertices"></param>
     /// <param name="whichSpring"></param>
     /// <param name="refBlock"></param>
-    /// <param name="isInverse"></param>
-    public void ReSpring(Vector3[] vertices, ConnectDirection whichSpring, Block refBlock, bool isInverse)
+    /// <param name="isRightLeg">右脚の質点を変更するか</param>
+    public void ReSpring(Vector3[] vertices, ConnectDirection whichSpring, Block refBlock, bool isRightLeg, int refVertexName)
     {
         var _tmpmass = new List<MassPoint>(_massPoints);
         _massPoints.Clear();
         _springs.Clear();
-        switch (whichSpring)
+        if(!isRightLeg)
         {
-            case ConnectDirection.UpperRight:
                 for (int i = 0; i < vertices.Length; i++)
                 {
 
                     if (i == VertexName.LeftLeg)
                     {
-                        _massPoints.Add(refBlock._massPoints[VertexName.RightLeg]);
+                        _massPoints.Add(refBlock._massPoints[refVertexName]);
                     }
                     else
                     {
@@ -915,15 +1019,15 @@ public class Block : MonoBehaviour
                 mesh.RecalculateBounds();
                 mesh.RecalculateNormals();
                 mesh.RecalculateTangents();
-                break;
-            case ConnectDirection.UpperLeft:
+        }   
+        else{
                 for (int i = 0; i < vertices.Length; i++)
                 {
 
                     if (i == VertexName.RightLeg)
                     {
 
-                        _massPoints.Add(refBlock._massPoints[VertexName.LeftLeg]);
+                        _massPoints.Add(refBlock._massPoints[refVertexName]);
                     }
                     else
                     {
@@ -956,9 +1060,6 @@ public class Block : MonoBehaviour
                     massPoint1.AddSpring(spring);
                     massPoint2.AddSpring(spring);
                 }
-                break;
-            default:
-                break;
         }
 
     }
@@ -973,6 +1074,11 @@ public class Block : MonoBehaviour
         || connectDirection == ConnectDirection.LowerRight)
         {
             this._leftLegInsertingBlock = focused;
+        }
+        else if(connectDirection == ConnectDirection.UP)
+        {
+            this._leftLegInsertingBlock = focused;
+            this._rightLegInsertingBlock = focused;
         }
         this._isFixed = false;
         int i = 0;
@@ -989,9 +1095,9 @@ public class Block : MonoBehaviour
 
     }
 
-    public void UpdatePreviousBlock(Block focused, ConnectDirection connectDirection, Block other)
+    public void UpdatePreviousBlock(Block focused, ConnectDirection connectDirection, bool isRightLeg, int refVertexName)
     {
-        Debug.Log(this.ID + " " + focused.ID + " " + other.ID);
+        //Debug.Log(this.ID + " " + focused.ID + " " + other.ID);
         if (connectDirection == ConnectDirection.UpperRight
         || connectDirection == ConnectDirection.LowerLeft)
         {
@@ -1015,7 +1121,7 @@ public class Block : MonoBehaviour
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
         mesh.RecalculateTangents();
-        ReSpring(_tmpVertices, connectDirection, focused, isInverse: true);
+        ReSpring(_tmpVertices, connectDirection, focused, isRightLeg: isRightLeg, refVertexName: refVertexName);
     }
     /// <summary>
     /// FocusedブロックにPreviousブロックを挿入する
@@ -1078,7 +1184,22 @@ public class Block : MonoBehaviour
                     //previousの右脚を挿入するので右脚の頂点を登録する
                     this._rootLeftPocketBlockVertexName = VertexName.RightLeg;
                 }
-
+                if(previous._rightPocketInsertingBlock.Count != 0)
+                {
+                    bool isSkippable = false;
+                    if(previous._rightPocketInsertingBlock.Count != 0 && previous._leftPocketInsertingBlock.Count != 0)
+                    {
+                        if(previous._rightPocketInsertingBlock[0].ID == previous._leftPocketInsertingBlock[0].ID)
+                        {
+                            isSkippable = true;
+                        }
+                    }
+                    if(previous._rightPocketInsertingBlock[0]._rightLegInsertingBlock != null
+                    && !isSkippable)
+                    {
+                        this._rightPocketInsertingBlock.Add(previous._rightPocketInsertingBlock[0]._rightLegInsertingBlock);
+                    }
+                }
                 //移動方向の設定
                 moveVector = new Vector3(-blockVallaySize, _margin, 0);
                 break;
@@ -1117,6 +1238,23 @@ public class Block : MonoBehaviour
                     this._rootRightPocketBlockID = previous.ID;
                     //previousの左脚を挿入するので右脚の頂点を登録する
                     this._rootRightPocketBlockVertexName = VertexName.LeftLeg;
+                }
+
+                if(previous._leftPocketInsertingBlock.Count != 0)
+                {
+                    bool isSkippable = false;
+                    if(previous._rightPocketInsertingBlock.Count != 0 && previous._leftPocketInsertingBlock.Count != 0)
+                    {
+                        if(previous._rightPocketInsertingBlock[0].ID == previous._leftPocketInsertingBlock[0].ID)
+                        {
+                            isSkippable = true;
+                        }
+                    }
+                    if(previous._leftPocketInsertingBlock[0]._leftLegInsertingBlock != null
+                    && !isSkippable)
+                    {
+                        this._leftPocketInsertingBlock.Add(previous._leftPocketInsertingBlock[0]._leftLegInsertingBlock);
+                    }
                 }
 
                 //移動方向の設定
@@ -1220,35 +1358,37 @@ public class Block : MonoBehaviour
                 previous._rightLegInsertingBlockID = this.ID;
                 previous._leftLegInsertingBlock = this;
                 previous._leftLegInsertingBlockID = this.ID;
-                //previousの右ポケットに脚を挿入しているブロックがある場合はrootの情報を移譲する
-                if (previous._rootRightPocketBlock != null)
-                {
-                    this._rootRightPocketBlock = previous._rootLeftPocketBlock;
-                    this._rootRightPocketBlockID = previous._rootLeftPocketBlock.ID;
-                    this._rootRightPocketBlockVertexName = previous._rootLeftPocketBlockVertexName;
-                }
-                //挿入しているブロックがない場合、previousがrootである
-                else
-                {
-                    this._rootLeftPocketBlock = previous;
-                    this._rootLeftPocketBlockID = previous.ID;
-                    //previousの右脚を挿入するので右脚の頂点を登録する
-                    this._rootLeftPocketBlockVertexName = VertexName.RightLeg;
-                }
-                if (previous._rootLeftPocketBlock != null)
-                {
-                    this._rootLeftPocketBlock = previous._rootRightPocketBlock;
-                    this._rootLeftPocketBlockID = previous._rootRightPocketBlock.ID;
-                    this._rootLeftPocketBlockVertexName = previous._rootRightPocketBlockVertexName;
-                }
-                //挿入しているブロックがない場合、previousがrootである
-                else
-                {
-                    this._rootLeftPocketBlock = previous;
-                    this._rootLeftPocketBlockID = previous.ID;
-                    //previousの右脚を挿入するので右脚の頂点を登録する
-                    this._rootLeftPocketBlockVertexName = VertexName.RightLeg;
-                }
+                this._massPoints[VertexName.RightLeg]._isFixed = true;
+                this._massPoints[VertexName.LeftLeg]._isFixed = true;
+                // //previousの右ポケットに脚を挿入しているブロックがある場合はrootの情報を移譲する
+                // if (previous._rootRightPocketBlock != null)
+                // {
+                //     this._rootRightPocketBlock = previous._rootLeftPocketBlock;
+                //     this._rootRightPocketBlockID = previous._rootLeftPocketBlock.ID;
+                //     this._rootRightPocketBlockVertexName = previous._rootLeftPocketBlockVertexName;
+                // }
+                // //挿入しているブロックがない場合、previousがrootである
+                // else
+                // {
+                //     this._rootLeftPocketBlock = previous;
+                //     this._rootLeftPocketBlockID = previous.ID;
+                //     //previousの右脚を挿入するので右脚の頂点を登録する
+                //     this._rootLeftPocketBlockVertexName = VertexName.RightLeg;
+                // }
+                // if (previous._rootLeftPocketBlock != null)
+                // {
+                //     this._rootLeftPocketBlock = previous._rootRightPocketBlock;
+                //     this._rootLeftPocketBlockID = previous._rootRightPocketBlock.ID;
+                //     this._rootLeftPocketBlockVertexName = previous._rootRightPocketBlockVertexName;
+                // }
+                // //挿入しているブロックがない場合、previousがrootである
+                // else
+                // {
+                //     this._rootLeftPocketBlock = previous;
+                //     this._rootLeftPocketBlockID = previous.ID;
+                //     //previousの右脚を挿入するので右脚の頂点を登録する
+                //     this._rootLeftPocketBlockVertexName = VertexName.RightLeg;
+                // }
 
                 //移動方向の設定
                 moveVector = new Vector3(0, _margin, 0);
@@ -1361,10 +1501,20 @@ public class Block : MonoBehaviour
             var crossLocal = corssDirection * -Vector3.Cross(
                 previous._tmpVertices[previousAnotherBlockPocketIndex] - previous._tmpVertices[previousBlockPocketIndex],
                 previous._tmpVertices[previousBlockEyeIndex] - previous._tmpVertices[previousBlockPocketIndex]);
-            if ((previous._leftPocketInsertingBlock.Count != 0 && connectDirection == ConnectDirection.UpperRight)
-            || (previous._rightPocketInsertingBlock.Count != 0 && connectDirection == ConnectDirection.UpperLeft))
+            bool isSkippable = false;
+            if((previous._leftPocketInsertingBlock.Count != 0 && previous._rightPocketInsertingBlock.Count != 0))
             {
-
+                if(previous._leftPocketInsertingBlock[0].ID == previous._rightPocketInsertingBlock[0].ID)
+                {
+                    isSkippable = true;
+                }
+            }
+            if (((previous._leftPocketInsertingBlock.Count != 0 && connectDirection == ConnectDirection.UpperRight)
+            || (previous._rightPocketInsertingBlock.Count != 0 && connectDirection == ConnectDirection.UpperLeft)
+            || (connectDirection == ConnectDirection.UpperRight && previous._rightPocketInsertingBlock.Count != 0 && previous._rightPocketInsertingBlock[0]._rightLegInsertingBlock != null)
+            || (connectDirection == ConnectDirection.UpperLeft && previous._leftPocketInsertingBlock.Count != 0 && previous._leftPocketInsertingBlock[0]._leftLegInsertingBlock != null))
+            && (!isSkippable))
+            {
                 _tmpVertices[thisBlockLegIndex] =
                 crossLocal.normalized * LegLengthLocal + _tmpVertices[thisBlockPocketIndex];
                 //_massPoints[VertexName.RightLeg]._position = new Vector3(_massPoints[VertexName.RightPocket]._position.x, _massPoints[VertexName.RightLeg]._position.y, _massPoints[VertexName.RightLeg]._position.z);
@@ -1403,17 +1553,68 @@ public class Block : MonoBehaviour
             mesh.RecalculateBounds();
             mesh.RecalculateNormals();
             mesh.RecalculateTangents();
-            if ((connectDirection == ConnectDirection.UpperRight && previous._rightPocketInsertingBlock.Count != 0 && previous._rightLegInsertingBlock != null))
+            if (connectDirection == ConnectDirection.UpperRight && previous._rightPocketInsertingBlock.Count != 0
+            && !isSkippable)
             {
+                previous.UpdatePreviousBlock(this, connectDirection);
+                int depth = 1;
                 var target = previous._rightPocketInsertingBlock[0];
-                previous.UpdatePreviousBlock(this, connectDirection);
-                target.UpdatePreviousBlock(this, connectDirection, target);
+                this._massPoints[VertexName.RightLeg]._isFixed = true;
+                while(target != null)
+                {
+                    if(depth % 2 == 0)
+                    {
+                        target.UpdatePreviousBlock(this, connectDirection, isRightLeg: true, refVertexName: VertexName.RightLeg);
+                        target = target._rightPocketInsertingBlock[0];
+                    }
+                    else
+                    {
+                        target.UpdatePreviousBlock(this, connectDirection, isRightLeg: false, refVertexName: VertexName.LeftLeg);
+                        target = target._leftPocketInsertingBlock[0];
+                    }
+                    depth++;
+                }
+                
+                
             }
-            else if ((connectDirection == ConnectDirection.UpperLeft && previous._leftPocketInsertingBlock.Count != 0 && previous._leftLegInsertingBlock != null))
+            else if (connectDirection == ConnectDirection.UpperLeft && previous._leftPocketInsertingBlock.Count != 0
+            && !isSkippable)
             {
-                var target = previous._leftPocketInsertingBlock[0];
                 previous.UpdatePreviousBlock(this, connectDirection);
-                target.UpdatePreviousBlock(this, connectDirection, target);
+                var target = previous._leftPocketInsertingBlock[0];
+                this._massPoints[VertexName.LeftLeg]._isFixed = true;
+                int depth = 1;
+                while(target != null)
+                {
+                    if(depth % 2 == 0)
+                    {
+                        target.UpdatePreviousBlock(this, connectDirection, isRightLeg: false, refVertexName: VertexName.LeftLeg);
+                        if(target._leftPocketInsertingBlock.Count != 0)
+                        {
+                            target = target._leftPocketInsertingBlock[0];
+                        }
+                        else
+                        {
+                            target = null;
+                        }
+                            
+                        
+
+                    }
+                    else
+                    {
+                        target.UpdatePreviousBlock(this, connectDirection, isRightLeg: true, refVertexName: VertexName.RightLeg);
+                        if(target._rightPocketInsertingBlock.Count != 0)
+                        {
+                            target = target._rightPocketInsertingBlock[0];
+                        }
+                        else
+                        {
+                            target = null;
+                        }
+                    }
+                    depth++;
+                }
             }
             else
             {
@@ -1485,33 +1686,52 @@ public class Block : MonoBehaviour
             var crossLocal = corssDirection * -Vector3.Cross(
                 _tmpVertices[thisAnothreBlockPocketIndex] - _tmpVertices[thisBlockPocketIndex],
                 _tmpVertices[thisBlockEyeIndex] - _tmpVertices[thisBlockPocketIndex]);
-            if (defaultScene.previousBlock._leftLegInsertedBlock != null)
-            {
-                cross = previous._massPoints[VertexName.RightLeg]._position - previous._massPoints[VertexName.RightPocket]._position;
-                crossLocal = previous._tmpVertices[VertexName.RightLeg] - previous._tmpVertices[VertexName.RightPocket];
-                //左足を含む面に平行に右脚の面を伸ばす
-                // 脚を曲げる
-                _tmpVertices[thisBlockPocketIndex] =
-                (crossLocal).normalized * _margin + previous._tmpVertices[thisBlockPocketIndex];
+            // if (defaultScene.previousBlock._leftLegInsertedBlock != null)
+            // {
+                // cross = previous._massPoints[VertexName.RightLeg]._position - previous._massPoints[VertexName.RightPocket]._position;
+                // crossLocal = previous._tmpVertices[VertexName.RightLeg] - previous._tmpVertices[VertexName.RightPocket];
+                // //左足を含む面に平行に右脚の面を伸ばす
+                // // 脚を曲げる
+                // _tmpVertices[thisBlockPocketIndex] =
+                // (crossLocal).normalized * _margin + previous._tmpVertices[thisBlockPocketIndex];
 
+                // _tmpVertices[thisBlockLegIndex] =
+                //  (crossLocal).normalized * LegLengthLocal + _tmpVertices[thisBlockPocketIndex];
+
+                // _massPoints[thisBlockPocketIndex]._position =
+                // (cross).normalized * _margin + previous._massPoints[thisBlockPocketIndex]._position;
+                // _massPoints[thisBlockLegIndex]._position =
+                // (cross).normalized * LegLength + _massPoints[thisBlockPocketIndex]._position;
+                // //_massPoints[VertexName.LeftLeg]._position = new Vector3(_massPoints[VertexName.LeftPocket]._position.x, _massPoints[VertexName.LeftLeg]._position.y, _massPoints[VertexName.LeftLeg]._position.z);
                 _tmpVertices[thisBlockLegIndex] =
-                 (crossLocal).normalized * LegLengthLocal + _tmpVertices[thisBlockPocketIndex];
-
-                _massPoints[thisBlockPocketIndex]._position =
-                (cross).normalized * _margin + previous._massPoints[thisBlockPocketIndex]._position;
-                _massPoints[thisBlockLegIndex]._position =
-                (cross).normalized * LegLength + _massPoints[thisBlockPocketIndex]._position;
-                //_massPoints[VertexName.LeftLeg]._position = new Vector3(_massPoints[VertexName.LeftPocket]._position.x, _massPoints[VertexName.LeftLeg]._position.y, _massPoints[VertexName.LeftLeg]._position.z);
-            }
-
-            else
-            {
-                _tmpVertices[thisBlockLegIndex] =
-                crossLocal.normalized * LegLengthLocal + _tmpVertices[thisBlockPocketIndex];
+                -1*crossLocal.normalized * LegLengthLocal + _tmpVertices[thisBlockPocketIndex];
                 //_massPoints[VertexName.RightLeg]._position = new Vector3(_massPoints[VertexName.RightPocket]._position.x, _massPoints[VertexName.RightLeg]._position.y, _massPoints[VertexName.RightLeg]._position.z);
                 _massPoints[thisBlockLegIndex]._position =
-                cross.normalized * LegLength + _massPoints[thisBlockPocketIndex]._position;
-            }
+                -1*cross.normalized * LegLength + _massPoints[thisBlockPocketIndex]._position;
+                //もう一方の脚の質点を変更する
+                cross = corssDirection * -Vector3.Cross(
+                    _massPoints[thisAnotherBlockEyeIndex]._position - _massPoints[thisAnothreBlockPocketIndex]._position,
+                    _massPoints[thisBlockPocketIndex]._position - _massPoints[thisAnothreBlockPocketIndex]._position);
+                crossLocal = corssDirection * -Vector3.Cross(
+                    _tmpVertices[thisAnotherBlockEyeIndex] - _tmpVertices[thisAnothreBlockPocketIndex],
+                    _tmpVertices[thisBlockPocketIndex] - _tmpVertices[thisAnothreBlockPocketIndex]);
+
+                _tmpVertices[thisAnotherBlockLegIndex] =
+                -1*crossLocal.normalized * LegLengthLocal + _tmpVertices[thisAnothreBlockPocketIndex];
+                //_massPoints[VertexName.RightLeg]._position = new Vector3(_massPoints[VertexName.RightPocket]._position.x, _massPoints[VertexName.RightLeg]._position.y, _massPoints[VertexName.RightLeg]._position.z);
+                _massPoints[thisAnotherBlockLegIndex]._position =
+                -1*cross.normalized * LegLength + _massPoints[thisAnothreBlockPocketIndex]._position;
+
+            //}
+
+            // else
+            // {
+            //     _tmpVertices[thisBlockLegIndex] =
+            //     crossLocal.normalized * LegLengthLocal + _tmpVertices[thisBlockPocketIndex];
+            //     //_massPoints[VertexName.RightLeg]._position = new Vector3(_massPoints[VertexName.RightPocket]._position.x, _massPoints[VertexName.RightLeg]._position.y, _massPoints[VertexName.RightLeg]._position.z);
+            //     _massPoints[thisBlockLegIndex]._position =
+            //     cross.normalized * LegLength + _massPoints[thisBlockPocketIndex]._position;
+            // }
 
             //左ポケット部分は固定点とする
             // _massPoints[VertexName.LeftPocket]._isFixed = true;
@@ -1522,13 +1742,13 @@ public class Block : MonoBehaviour
             mesh.RecalculateTangents();
             previous.UpdatePreviousBlock(this, connectDirection);
             //TODO: 天井からつるすバネを張る
-            _massPoints[thisBlockPocketIndex]._position =
-            (previous._massPoints[previousBlockLegIndex]._position - previous._massPoints[previousBlockPocketIndex]._position).normalized * _margin
-            + previous._massPoints[previousBlockLegIndex]._position;
+            // _massPoints[thisBlockPocketIndex]._position =
+            // (previous._massPoints[previousBlockLegIndex]._position - previous._massPoints[previousBlockPocketIndex]._position).normalized * _margin
+            // + previous._massPoints[previousBlockLegIndex]._position;
 
-            _massPoints[thisBlockEyeIndex]._position =
-            (previous._massPoints[previousBlockLegIndex]._position - previous._massPoints[previousBlockEyeIndex]._position).normalized * _margin
-            + previous._massPoints[previousBlockEyeIndex]._position;
+            // _massPoints[thisBlockEyeIndex]._position =
+            // (previous._massPoints[previousBlockLegIndex]._position - previous._massPoints[previousBlockEyeIndex]._position).normalized * _margin
+            // + previous._massPoints[previousBlockEyeIndex]._position;
             i = 0;
             int spring1 = 0;
             int spring2 = 0;
@@ -1539,15 +1759,15 @@ public class Block : MonoBehaviour
                 {
                     spring1 = i;
                 }
-                if (spring._massPointIndexes.Contains(thisBlockEyeIndex)
-                && spring._massPointIndexes.Contains(thisBlockLegIndex))
+                if (spring._massPointIndexes.Contains(thisBlockLegIndex)
+                && spring._massPointIndexes.Contains(thisAnotherBlockLegIndex))
                 {
                     spring2 = i;
                 }
                 i++;
             }
-            _springs.RemoveAt(spring1);
-            _springs.RemoveAt(spring2);
+            //_springs.RemoveAt(spring1);
+            //_springs.RemoveAt(spring2);
         }
         else //右下左下
         {

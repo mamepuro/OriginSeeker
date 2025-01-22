@@ -35,6 +35,7 @@ Shader "Custom/Wireframe" {
     }
 
     SubShader {
+        Offset -1 , -1
         Tags {
             "Queue" = "Transparent" 
             "RenderType" = "Transparent"

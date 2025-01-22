@@ -108,7 +108,7 @@ public static class CreateButtonUi
         //}
         // ������ UI��`�悷�鏈�����L�q
         ShowButtons(sceneView.position.size);
-        ShowInfoPanel();
+       // ShowInfoPanel();
         Handles.EndGUI();
     }
     private static void ShowInfoPanel()
@@ -280,13 +280,17 @@ public static class CreateButtonUi
                     _blocks.Add(block);
                 }
             }
-            if (GUI.Button(rect2, "円柱"))
+            if (GUI.Button(rect2, "円錐"))
             {
+                
 
                 if (Selection.gameObjects.Length == 1
                 && Selection.activeGameObject.GetComponent<ProBuilderShape>() != null)
                 {
                     var shape = Selection.activeGameObject.GetComponents<ProBuilderShape>();
+                    var shapeName = shape[0].name;
+                    Debug.Log("shape name is " + shapeName);
+                    
                     var c_Transform = Selection.activeGameObject.transform;
                     var row = GetRow(shape[0].m_Size);
                     var column = GetColumn(shape[0].m_Size);
@@ -323,12 +327,17 @@ public static class CreateButtonUi
                                     //blockプレハブにアタッチされているblock.csにアクセスする
                                     var block = obj.GetComponent<Block>();
                                     var meshfilter = obj.GetComponent<MeshFilter>();
+                                    var material =  obj.GetComponent<Renderer>().material.color;
+                                    Debug.Log("material is " + material);
+                                    System.Random val = new System.Random();
+                                    material = new Color32((byte)val.Next(0,255), (byte)val.Next(0,255), (byte)val.Next(0,255), 1);
                                     var mesh = new Mesh();
                                     mesh.SetVertices(vertices);
                                     mesh.SetTriangles(triangles, 0);
                                     //mesh.SetNormals();
                                     meshfilter.mesh = mesh;
                                     block.mesh = mesh;
+                                    
                                     block.SetVertices();
                                     block.ID = ID;
                                     block.defaultScene = defaultScene;
@@ -340,7 +349,8 @@ public static class CreateButtonUi
                                     _blocks.Add(block);
                                     var newX = (shape[0].m_Size.x * (shape[0].m_Size.y - c * _margin)) / (shape[0].m_Size.y);
                                     Vector3 newSize = new Vector3(shape[0].m_Size.x, shape[0].m_Size.y, shape[0].m_Size.x);
-                                    var size = ChangeBlockVallySize(newSize, block);
+                                    float z_buffer = 0.0001f * c;
+                                    var size = ChangeBlockVallySize(newSize, block,z_buffer);
                                     block.TransformInsertionModel();
                                     var radius = size * rowSize * 2 / (2 * Mathf.PI);
                                     //Debug.Log("H:radius is " + radius + "column is " + c);
@@ -376,7 +386,7 @@ public static class CreateButtonUi
                     }
                 }
             }
-            if (GUI.Button(rect3, "円錐"))
+            if (GUI.Button(rect3, "円柱"))
             {
                 Debug.Log("convert to block");
                 if (Selection.gameObjects.Length == 1
@@ -415,6 +425,14 @@ public static class CreateButtonUi
                                     var block = obj.GetComponent<Block>();
                                     var meshfilter = obj.GetComponent<MeshFilter>();
                                     var mesh = new Mesh();
+                                    System.Random val = new System.Random();
+                                    int f = 256 / column;
+                                    int f2 = 256 / rowSize;
+
+                                    //obj.GetComponent<Renderer>().material.color = new Color32((byte)200, (byte)(f * c), (byte)(f2 * r), 255);                               
+                                    obj.GetComponent<Renderer>().material.color = new Color32((byte)val.Next(0,255), (byte)val.Next(0,255), (byte)val.Next(0,255), 255);                                
+                                    //Debug.Log("material is " + material);
+ 
                                     mesh.SetVertices(vertices);
                                     mesh.SetTriangles(triangles, 0);
                                     //mesh.SetNormals();
@@ -428,7 +446,8 @@ public static class CreateButtonUi
                                     block._isJoiningPrimitive = true;
                                     ID++;
                                     _blocks.Add(block);
-                                    var size = ChangeBlockVallySize(shape[0].m_Size, block);
+                                    float z_buffer = 0.0001f * c;
+                                    var size = ChangeBlockVallySize(shape[0].m_Size, block, z_buffer);
                                     block.TransformInsertionModel();
                                     var radius = size * rowSize * 2 / (2 * Mathf.PI);
                                     if (shape[0].m_Size.x < 4.0)
@@ -540,7 +559,7 @@ public static class CreateButtonUi
                                     //pivot の位置を設定
 
                                     Vector3 newSize = new Vector3(shape[0].m_Size.x, shape[0].m_Size.y, shape[0].m_Size.x);
-                                    var size = ChangeBlockVallySize(newSize, block);
+                                    var size = ChangeBlockVallySize(newSize, block, 0.0f);
                                     block.TransformInsertionModel();
                                     var radius = size * rowSize * 2 / (2 * Mathf.PI);
                                     if (shape[0].m_Size.x <= 4.0)
@@ -722,7 +741,7 @@ public static class CreateButtonUi
     }
 
 
-    public static float ChangeBlockVallySize(Vector3 cylinderSize, Block block)
+    public static float ChangeBlockVallySize(Vector3 cylinderSize, Block block, float z_buffer)
     {
         float size = (cylinderSize.x * Mathf.PI / (rowSize * 2));
         //Debug.Log("size is " + size + "blockVallaySize is " + blockVallaySize); ;
@@ -737,7 +756,8 @@ public static class CreateButtonUi
 
         }
         // Debug.Log("diff is " + diff);
-        block.UpdateValleySize(diff);
+        //z-fightingを防ぐためにz_bufferを追加する
+        block.UpdateValleySize(diff + z_buffer);
         return size;
     }
 }
