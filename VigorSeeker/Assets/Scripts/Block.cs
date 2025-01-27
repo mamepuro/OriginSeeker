@@ -1833,5 +1833,150 @@ public class Block : MonoBehaviour
             //previous._springs.RemoveAt(spring1);
             //previous._springs.RemoveAt(spring2);
         }
+        /*天井と地面のバネを張る*/
+        if(this._leftLegInsertingBlock == null)
+        {
+            for (int i = 0; i < _initialSpringIndex.GetLength(0); i++)
+            {
+                var spring = gameObject.AddComponent<Spring>();
+                var massPoint1 = _massPoints[_initialSpringIndex[i, 0]];
+                var massPoint2 = _massPoints[_initialSpringIndex[i, 1]];
+                //TODO: distanceは遅いのでmagintudeを使う
+                var initialLength = Vector3.Distance(massPoint1._position, massPoint2._position);
+                spring.SetSpring(massPoint1, massPoint2,
+                _springConstant, springLength: initialLength, 20.0f, 1.0f, springType: SpringType.Block);
+                _springs.Add(spring);
+                massPoint1.AddSpring(spring);
+                massPoint2.AddSpring(spring);
+            }
+        }
+        //マジックナンバーとして右脚-天井は-10,左脚-天井は-11,右脚-地面は-12,左脚-地面は-13
+        if(this._rightLegInsertingBlock == null)
+        {
+            bool isAddable = true;
+            foreach(var m in this._massPoints)
+            {
+                //-10は右脚と
+                if(m._index == -10)
+                {
+                    isAddable = false;
+                }
+            }
+            if(isAddable)
+            {
+                var massPoint = gameObject.AddComponent<MassPoint>();
+                massPoint.SetMassSpring(30.0f, Vector3.zero, -10, v[VertexName.RightLeg] + new Vector3(0,1,0), this);
+                massPoint._isFixed = true;
+                _massPoints.Add(massPoint);
+                int targetIndex = 0;
+                for(int i=0;i<_massPoints.Count-1;i++)
+                {
+                    if(_massPoints[i]._index == -10)
+                    {
+                        targetIndex = i;
+                    }
+                }
+                var spring = gameObject.AddComponent<Spring>();
+                var massPoint1 = _massPoints[VertexName.RightLeg];
+                var massPoint2 = _massPoints[targetIndex];
+                //TODO: distanceは遅いのでmagintudeを使う
+                var initialLength = Vector3.Distance(massPoint1._position, massPoint2._position);
+                spring.SetSpring(massPoint1, massPoint2,
+                _springConstant, springLength: initialLength, 20.0f, 1.0f, springType: SpringType.Tenchi);
+                _springs.Add(spring);
+                massPoint1.AddSpring(spring);
+                massPoint2.AddSpring(spring);
+            }
+        }
+        if(this._leftLegInsertingBlock == null)
+        {
+            bool isAddable = true;
+            foreach(var m in this._massPoints)
+            {
+                //-11は左脚と
+                if(m._index == -11)
+                {
+                    isAddable = false;
+                }
+            }
+            if(isAddable)
+            {
+                var massPoint = gameObject.AddComponent<MassPoint>();
+                massPoint.SetMassSpring(30.0f, Vector3.zero, -11, v[VertexName.LeftLeg] + new Vector3(0,1,0), this);
+                massPoint._isFixed = true;
+                _massPoints.Add(massPoint);
+                int targetIndex = 0;
+                for(int i=0;i<_massPoints.Count-1;i++)
+                {
+                    if(_massPoints[i]._index == -11)
+                    {
+                        targetIndex = i;
+                    }
+                }
+                var spring = gameObject.AddComponent<Spring>();
+                var massPoint1 = _massPoints[VertexName.LeftLeg];
+                var massPoint2 = _massPoints[targetIndex];
+            }
+        }
+        if(previous._leftPocketInsertingBlock.Count == 0)
+        {
+            bool isAddable = true;
+            foreach(var m in previous._massPoints)
+            {
+                //-12は右脚と
+                if(m._index == -13)
+                {
+                    isAddable = false;
+                }
+            }
+            if(isAddable)
+            {
+                var massPoint = previous.gameObject.AddComponent<MassPoint>();
+                massPoint.SetMassSpring(30.0f, Vector3.zero, -12, previous.v[VertexName.LeftPocket] - new Vector3(0,1,0), previous);
+                massPoint._isFixed = true;
+                previous._massPoints.Add(massPoint);
+                int targetIndex = 0;
+                for(int i=0;i<previous._massPoints.Count-1;i++)
+                {
+                    if(previous._massPoints[i]._index == -13)
+                    {
+                        targetIndex = i;
+                    }
+                }
+                var spring = previous.gameObject.AddComponent<Spring>();
+                var massPoint1 = previous._massPoints[VertexName.LeftPocket];
+                var massPoint2 = previous._massPoints[targetIndex];
+            }
+        }
+        if(previous._rightPocketInsertingBlock.Count == 0)
+        {
+            bool isAddable = true;
+            foreach(var m in previous._massPoints)
+            {
+                //-12は右脚と
+                if(m._index == -12)
+                {
+                    isAddable = false;
+                }
+            }
+            if(isAddable)
+            {
+                var massPoint = previous.gameObject.AddComponent<MassPoint>();
+                massPoint.SetMassSpring(30.0f, Vector3.zero, -13, previous.v[VertexName.RightPocket] - new Vector3(0,1,0), previous);
+                massPoint._isFixed = true;
+                previous._massPoints.Add(massPoint);
+                int targetIndex = 0;
+                for(int i=0;i<previous._massPoints.Count-1;i++)
+                {
+                    if(previous._massPoints[i]._index == -12)
+                    {
+                        targetIndex = i;
+                    }
+                }
+                var spring = previous.gameObject.AddComponent<Spring>();
+                var massPoint1 = previous._massPoints[VertexName.RightPocket];
+                var massPoint2 = previous._massPoints[targetIndex];
+            }
+        }
     }
 }
